@@ -1,0 +1,5 @@
+ALTER TABLE expenses
+    ALTER COLUMN note DROP NOT NULL,
+    ALTER COLUMN amount TYPE DECIMAL(12, 2),
+    ALTER COLUMN category_id SET NOT NULL,
+    ALTER COLUMN category_id DROP DEFAULT;

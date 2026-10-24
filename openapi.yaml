@@ -1,0 +1,284 @@
+openapi: 3.0.3
+info:
+  title: Expense Tracker API
+  version: 1.0.0
+  description: API routes currently implemented by the Expense Tracker Spring application.
+servers:
+  - url: http://localhost:8080
+    description: Local application
+tags:
+  - name: Authentication
+  - name: Categories
+  - name: Expenses
+paths:
+  /api/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              userName: alex
+              email: alex@example.com
+              password: change-me
+      responses:
+        '200':
+          description: Plain text success or error message as returned by the current controller
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: User registered successfully
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Log in
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Plain text success or error message as returned by the current controller
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: User logged in successfully
+  /api/categories:
+    get:
+      tags: [Categories]
+      summary: List predefined expense categories
+      security: []
+      responses:
+        '200':
+          description: Available category IDs and names for expense requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+  /api/expense:
+    post:
+      tags: [Expenses]
+      summary: Create an expense
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseRequest'
+      responses:
+        '201':
+          description: Expense created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseResponse'
+    get:
+      tags: [Expenses]
+      summary: List expenses in an inclusive date range
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+      responses:
+        '200':
+          description: Expenses ordered by date descending
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExpenseResponse'
+  /api/expense/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    put:
+      tags: [Expenses]
+      summary: Replace an expense
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseRequest'
+      responses:
+        '200':
+          description: Updated expense
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseResponse'
+        '404':
+          description: Expense not found
+    patch:
+      tags: [Expenses]
+      summary: Update an expense
+      description: The current implementation expects the same complete request body as PUT.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseRequest'
+      responses:
+        '200':
+          description: Updated expense
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseResponse'
+        '404':
+          description: Expense not found
+    delete:
+      tags: [Expenses]
+      summary: Delete an expense
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Expense deleted
+        '404':
+          description: Expense not found
+  /api/expense/summary:
+    get:
+      tags: [Expenses]
+      summary: Get expense totals by category
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+      responses:
+        '200':
+          description: Category totals for the date range
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryTotal'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    from:
+      name: from
+      in: query
+      required: true
+      description: Start date, inclusive (ISO 8601 date)
+      schema:
+        type: string
+        format: date
+        example: '2026-01-01'
+    to:
+      name: to
+      in: query
+      required: true
+      description: End date, inclusive (ISO 8601 date)
+      schema:
+        type: string
+        format: date
+        example: '2026-01-31'
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [userName, email, password]
+      properties:
+        userName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    ExpenseRequest:
+      type: object
+      required: [amount, category_name, expenseDate]
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 12.5
+        category_name:
+          type: string
+          description: Must match a name returned by GET /api/categories
+          example: Food
+        note:
+          type: string
+          nullable: true
+        expenseDate:
+          type: string
+          format: date
+          description: Must be today or earlier
+          example: '2026-10-10'
+    ExpenseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        amount:
+          type: number
+          format: double
+        category:
+          type: string
+        note:
+          type: string
+          nullable: true
+        expenseDate:
+          type: string
+          format: date
+    CategoryTotal:
+      type: object
+      properties:
+        category:
+          type: string
+        total:
+          type: number
+          format: double
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
