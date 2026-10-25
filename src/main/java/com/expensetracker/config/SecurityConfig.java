@@ -43,14 +43,13 @@ public class SecurityConfig {
                         ex.authenticationEntryPoint(restAuthenticationEntryPoint))
 
                 .authorizeHttpRequests(authz -> authz
-                        requestMatchers("/", "/app", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error")
-                                .permitAll()
+                        .requestMatchers("/", "/app", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error")
+                        .permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/categories", "/api/categories/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**")
                         .permitAll()
                         .anyRequest().authenticated()
-
                 );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

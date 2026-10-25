@@ -1,0 +1,6 @@
+.git
+.github
+.idea
+target/*
+!target/*.jar
+*.iml
