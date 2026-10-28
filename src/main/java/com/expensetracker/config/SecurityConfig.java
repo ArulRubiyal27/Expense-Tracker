@@ -2,6 +2,7 @@ package com.expensetracker.config;
 
 import com.expensetracker.security.CustomUserDetailsService;
 import com.expensetracker.security.JwtAuthenticationFilter;
+import com.expensetracker.security.OAuth2LoginSuccessHandler;
 import com.expensetracker.security.RestAuthtenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,12 +25,14 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RestAuthtenticationEntryPoint restAuthenticationEntryPoint;
     private final CustomUserDetailsService customUserDetailsService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, RestAuthtenticationEntryPoint restAuthenticationEntryPoint, CustomUserDetailsService customUserDetailsService) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, RestAuthtenticationEntryPoint restAuthenticationEntryPoint, CustomUserDetailsService customUserDetailsService, OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
         this.customUserDetailsService = customUserDetailsService;
+        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
 
     @Bean
@@ -37,19 +40,26 @@ public class SecurityConfig {
         http.csrf(CsrfConfigurer::disable)
 
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint(restAuthenticationEntryPoint))
 
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/app", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error")
+                        .requestMatchers("/","/login", "/app", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error")
                         .permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**")
+                        .permitAll()
+                        .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/categories", "/api/categories/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**")
                         .permitAll()
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureUrl("/?oauth_error")
                 );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -58,15 +68,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
+    public DaoAuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(customUserDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
 

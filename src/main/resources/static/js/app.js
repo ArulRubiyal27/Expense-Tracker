@@ -70,12 +70,19 @@
   $('#expense-form').addEventListener('submit',async event=>{event.preventDefault();clearAlert();const body={amount:Number($('#expense-amount').value),category_name:$('#expense-category').value,note:$('#expense-note').value.trim()||null,expenseDate:$('#expense-date').value};const button=$('#expense-submit');button.disabled=true;try{await api(editingId?`/api/expense/${editingId}`:'/api/expense',{method:editingId?'PUT':'POST',body:JSON.stringify(body)});closeModal('expense-modal');alertMessage(editingId?'Expense updated.':'Expense added.','success');await loadDashboard();}catch(error){alertMessage(error.message);}finally{button.disabled=false;}});
   document.addEventListener('click',async event=>{const close=event.target.closest('[data-close]');if(close)closeModal(close.dataset.close);const mode=event.target.closest('[data-auth-mode]');if(mode)setAuthMode(mode.dataset.authMode);const edit=event.target.closest('[data-edit]');if(edit){const expense=expenses.find(e=>String(e.id)===edit.dataset.edit);if(expense)openExpense(expense);}const del=event.target.closest('[data-delete]');if(del){const expense=expenses.find(e=>String(e.id)===del.dataset.delete);if(!expense)return;if(!window.confirm(`Delete this ${expense.category.toLowerCase()} expense?`))return;try{await api(`/api/expense/${expense.id}`,{method:'DELETE'});alertMessage('Expense deleted.','success');await loadDashboard();}catch(error){alertMessage(error.message);}}});
   $('#top-add').addEventListener('click',()=>openExpense());$('#table-add').addEventListener('click',()=>openExpense());$('#month-select').addEventListener('change',loadDashboard);$('#search-input').addEventListener('input',e=>renderTable(e.target.value));$('#logout').addEventListener('click',logout);
+  $('#google-sign-in').addEventListener('click',()=>{window.location.href='/oauth2/authorization/google';});
   function setView(view){const transactions=view==='expenses';$('#transactions-panel').classList.toggle('hidden',!transactions);$('.dashboard-grid').classList.toggle('hidden',transactions);$('.stats-grid').classList.toggle('hidden',transactions);$('#crumb').textContent=transactions?'Transactions':'Overview';$$('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.view===view));if(transactions&&!token)ensureAuth();}
   $$('.nav-item').forEach(item=>item.addEventListener('click',()=>setView(item.dataset.view)));$('#view-all').addEventListener('click',()=>setView('expenses'));
   $$('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click',e=>{if(e.target===backdrop&&backdrop.id!=='auth-modal')closeModal(backdrop.id);}));document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal('expense-modal');});
+  const oauthParams=new URLSearchParams(window.location.hash.slice(1));
+  const oauthToken=oauthParams.get('access_token');
+  const oauthUsername=oauthParams.get('username');
+  const oauthError=new URLSearchParams(window.location.search).has('oauth_error');
+  if(oauthToken&&oauthUsername){const savedAt=Date.now();localStorage.setItem('ledger_token',oauthToken);localStorage.setItem('ledger_username',oauthUsername);localStorage.setItem('ledger_token_saved_at',String(savedAt));}
+  if(oauthToken||oauthError)history.replaceState(null,document.title,window.location.pathname);
   const savedAt=Number(localStorage.getItem('ledger_token_saved_at'));
   token=localStorage.getItem('ledger_token');username=localStorage.getItem('ledger_username');
   if(!token||!savedAt||Date.now()-savedAt>=3600000){token=null;username=null;localStorage.removeItem('ledger_token');localStorage.removeItem('ledger_username');localStorage.removeItem('ledger_token_saved_at');}
   setUser();setAuthMode('login');render();
-  if(token){expireSessionAfter(3600000-(Date.now()-savedAt));$('#app-shell').classList.remove('hidden');closeModal('auth-modal');loadDashboard();}else{openModal('auth-modal');}
+  if(token){expireSessionAfter(3600000-(Date.now()-savedAt));$('#app-shell').classList.remove('hidden');closeModal('auth-modal');loadDashboard();}else{openModal('auth-modal');if(oauthError)alertMessage('Google sign-in failed. Please try again.');}
 })();
