@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy | Expense Tracking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="legal-page">
+  <header class="legal-header">
+    <a class="brand legal-brand" href="/"><span class="brand-mark">E</span><span>Expense Tracking</span></a>
+    <nav aria-label="Main navigation"><a href="/privacy" aria-current="page">Privacy</a><a href="/terms">Terms</a><a class="legal-home" href="/">Back to app</a></nav>
+  </header>
+  <main class="legal-content">
+    <div class="eyebrow">YOUR DATA, EXPLAINED</div>
+    <h1>Privacy policy</h1>
+    <p class="legal-updated">Last updated: October 28, 2026</p>
+    <p>This page explains what information the Expense Tracker application handles when you use it, and how that information is used. It describes the behavior of this application; the operator of a deployed instance is responsible for its hosting, retention, and applicable privacy obligations.</p>
+
+    <h2>Information the app handles</h2>
+    <ul>
+      <li><strong>Account information:</strong> your name and email address. If you register with a password, the app stores a password hash rather than the original password.</li>
+      <li><strong>Expense information:</strong> amounts, categories, dates, and any notes you enter.</li>
+      <li><strong>Authentication information:</strong> the app uses a signed access token in your browser to authenticate API requests. Google sign-in also uses Google OAuth to authenticate your account.</li>
+    </ul>
+
+    <h2>How information is used</h2>
+    <p>Account information is used to identify your account and associate your expenses with you. Expense information is used to provide your personal transaction list, dashboard totals, and category summaries. Authentication information is used to sign you in and protect account-specific API operations.</p>
+
+    <h2>Storage and service providers</h2>
+    <p>Application records are stored in the database configured by the operator of the instance you use. When you choose Google sign-in, Google processes the sign-in according to its own privacy terms; this app receives profile information such as your email address and name for account identification. The app does not receive your Google password.</p>
+    <p>The app stores its access token in your browser's local storage. Use a private device you trust, sign out when finished on shared devices, and do not share access to your browser profile.</p>
+
+    <h2>Sharing and retention</h2>
+    <p>The app uses account information and expense records to provide its features. This project does not include advertising or analytics integrations. The pages load fonts from Google Fonts, which may receive your browser's request information when those fonts load. The operator of a hosted instance may have access to data needed to operate that instance and determines its retention and backup practices. No account-deletion feature is currently provided in the app; contact the instance operator to ask about deletion of your records.</p>
+
+    <h2>Your choices and security</h2>
+    <p>You may choose not to provide information, but account-based features require an account and expense tracking requires expense details. The app uses password hashing, authenticated API requests, and database access controls in its application flow. No method of internet transmission or storage can be guaranteed completely secure.</p>
+
+    <h2>Changes and contact</h2>
+    <p>This policy may be updated as the application changes. For questions or requests about data held by a deployed instance, contact the operator of that instance. For the project itself, use the repository's issue tracker.</p>
+    <a class="legal-back" href="/">← Back to Expense Tracking</a>
+  </main>
+  <footer class="legal-footer"><a href="/privacy" aria-current="page">Privacy</a><a href="/terms">Terms</a></footer>
+</body>
+</html>

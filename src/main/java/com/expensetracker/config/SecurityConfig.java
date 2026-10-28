@@ -46,7 +46,7 @@ public class SecurityConfig {
                         ex.authenticationEntryPoint(restAuthenticationEntryPoint))
 
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/","/login", "/app", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error")
+                        .requestMatchers("/", "/login", "/app", "/privacy", "/terms", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error")
                         .permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**")
                         .permitAll()

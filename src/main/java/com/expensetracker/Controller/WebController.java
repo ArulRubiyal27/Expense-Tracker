@@ -9,4 +9,14 @@ public class WebController {
     public String dashboard() {
         return "index";
     }
+
+    @GetMapping("/privacy")
+    public String privacy() {
+        return "privacy";
+    }
+
+    @GetMapping("/terms")
+    public String terms() {
+        return "terms";
+    }
 }
